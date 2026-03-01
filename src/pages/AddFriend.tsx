@@ -26,7 +26,7 @@ export default function AddFriend() {
 
   const onSubmit: SubmitHandler<AddFriendInput> = async (data) => {
     const res = await fetchWithAuth(
-      `${import.meta.env.VITE_API_DOMAIN}/api/friend-requests`,
+      `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/friend-requests`,
       {
         method: "POST",
         headers: {
@@ -35,8 +35,7 @@ export default function AddFriend() {
         body: JSON.stringify({
           email: data.email,
         }),
-        credentials: "include",
-      }
+      },
     );
 
     if (!res.ok) {
@@ -61,8 +60,8 @@ export default function AddFriend() {
         {errors.root
           ? errors.root.message
           : errors.email
-          ? errors.email.message
-          : ""}
+            ? errors.email.message
+            : ""}
       </p>
       <form onSubmit={handleSubmit(onSubmit)} className="mt-2 flex gap-2">
         <input

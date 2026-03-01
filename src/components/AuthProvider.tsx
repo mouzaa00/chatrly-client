@@ -12,7 +12,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function checkAuthStatus() {
       try {
-        const user = await fetchCurrentUser();
+        const { user } = await fetchCurrentUser();
         setCurrentUser(user);
       } catch {
         setCurrentUser(null);
@@ -25,12 +25,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = async (data: RegisterData) => {
-    const user = await authService.register(data);
+    const { user } = await authService.register(data);
     setCurrentUser(user);
   };
 
   const login = async (credentials: LoginFormInput) => {
-    const user = await authService.login(credentials);
+    const { user } = await authService.login(credentials);
     setCurrentUser(user);
   };
 

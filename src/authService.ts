@@ -4,7 +4,7 @@ import { LoginFormInput } from "./pages/Login";
 export const authService = {
   register: async (data: RegisterData) => {
     const res = await fetch(
-      `${import.meta.env.VITE_API_DOMAIN}/api/auth/register`,
+      `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/auth/register`,
       {
         method: "POST",
         headers: {
@@ -12,7 +12,7 @@ export const authService = {
         },
         credentials: "include",
         body: JSON.stringify(data),
-      }
+      },
     );
     if (!res.ok) {
       const err = await res.json();
@@ -22,7 +22,7 @@ export const authService = {
   },
   login: async (credentials: LoginFormInput) => {
     const res = await fetch(
-      `${import.meta.env.VITE_API_DOMAIN}/api/auth/login`,
+      `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/auth/login`,
       {
         method: "POST",
         headers: {
@@ -30,7 +30,7 @@ export const authService = {
         },
         credentials: "include",
         body: JSON.stringify(credentials),
-      }
+      },
     );
     if (!res.ok) {
       const err = await res.json();
@@ -39,9 +39,12 @@ export const authService = {
     return res.json();
   },
   logout: async () => {
-    await fetch(`${import.meta.env.VITE_API_DOMAIN}/api/auth/login`, {
-      method: "POST",
-      credentials: "include",
-    });
+    await fetch(
+      `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/auth/logout`,
+      {
+        method: "POST",
+        credentials: "include",
+      },
+    );
   },
 };

@@ -12,7 +12,7 @@ export default function Friends() {
   async function fetchFriends() {
     try {
       const res = await fetchWithAuth(
-        `${import.meta.env.VITE_API_DOMAIN}/api/friends`
+        `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/friends`,
       );
       const data = await res.json();
       setFriends(data.friends);
@@ -28,14 +28,14 @@ export default function Friends() {
   async function handleDeleteFriend(id: string) {
     // Optimistically remove the record from state
     setFriends((prevFriends) =>
-      prevFriends?.filter((friend) => friend.id !== id)
+      prevFriends?.filter((friend) => friend.id !== id),
     );
 
     const res = await fetchWithAuth(
-      `${import.meta.env.VITE_API_DOMAIN}/api/friends/${id}`,
+      `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/friends/${id}`,
       {
         method: "DELETE",
-      }
+      },
     );
 
     if (!res.ok) {
@@ -52,7 +52,7 @@ export default function Friends() {
   async function getOrCreateConversation(recipientId: string) {
     try {
       const res = await fetchWithAuth(
-        `${import.meta.env.VITE_API_DOMAIN}/api/conversations`,
+        `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/conversations`,
         {
           method: "POST",
           headers: {
@@ -61,7 +61,7 @@ export default function Friends() {
           body: JSON.stringify({
             recipientId,
           }),
-        }
+        },
       );
 
       const { conversation } = await res.json();

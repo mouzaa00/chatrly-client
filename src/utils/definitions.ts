@@ -4,8 +4,6 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  createAt: string;
-  updatedAt: string;
 }
 
 export interface Conversation {
@@ -14,8 +12,6 @@ export interface Conversation {
   recipientId: string;
   creator: User;
   recipient: User;
-  createAt: string;
-  messages: Message[];
 }
 
 export interface Message {

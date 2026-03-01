@@ -8,12 +8,12 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
 
   if (res.status === 401) {
     const refreshRes = await fetch(
-      `${import.meta.env.VITE_API_DOMAIN}/api/auth/refresh`,
+      `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/auth/refresh`,
       {
         ...options,
         credentials: "include",
         method: "POST",
-      }
+      },
     );
 
     if (!refreshRes.ok) {
@@ -30,9 +30,9 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   return res;
 }
 
-export async function fetchCurrentUser(): Promise<User> {
+export async function fetchCurrentUser(): Promise<{ user: User }> {
   const res = await fetchWithAuth(
-    `${import.meta.env.VITE_API_DOMAIN}/api/current-user`
+    `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/users/me`,
   );
 
   if (!res.ok) {

@@ -5,10 +5,7 @@ import { User } from "../utils/definitions";
 
 interface FriendRequest {
   id: string;
-  senderId: string;
-  recipientId: string;
-  status: string;
-  sender: User;
+  user: User;
 }
 
 export default function PendingFriends() {
@@ -18,10 +15,10 @@ export default function PendingFriends() {
   async function fetchFriendRequests() {
     try {
       const res = await fetchWithAuth(
-        `${import.meta.env.VITE_API_DOMAIN}/api/friend-requests`
+        `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/friend-requests?type=received`,
       );
-      const data = await res.json();
-      setFriendRequests(data.friendRequests);
+      const { friendRequests } = await res.json();
+      setFriendRequests(friendRequests);
     } catch (err) {
       if (err instanceof Error) {
         console.error(err.message);
@@ -33,13 +30,13 @@ export default function PendingFriends() {
 
   async function updateFriendRequest(
     friendRequestId: string,
-    status: "accepted" | "rejected" | "pending"
+    status: "accepted" | "rejected" | "pending",
   ) {
     try {
       const res = await fetchWithAuth(
         `${
           import.meta.env.VITE_API_DOMAIN
-        }/api/friend-requests/${friendRequestId}`,
+        }${import.meta.env.VITE_API_PATH}/friend-requests/${friendRequestId}`,
         {
           method: "PATCH",
           headers: {
@@ -48,7 +45,7 @@ export default function PendingFriends() {
           body: JSON.stringify({
             status,
           }),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -87,7 +84,7 @@ export default function PendingFriends() {
               key={friendRequest.id}
               className="flex justify-between p-2 hover:bg-neutral-200 transition rounded cursor-pointer border-t border-neutral-400"
             >
-              <span>{friendRequest.sender.name}</span>
+              <span>{friendRequest.user.name}</span>
               <div className="flex gap-2">
                 <button
                   onClick={() =>

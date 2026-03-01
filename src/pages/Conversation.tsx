@@ -1,54 +1,61 @@
 import { format, parseISO } from "date-fns";
 import { useParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { fetchWithAuth } from "../utils/helpers";
 import { io } from "socket.io-client";
-import { Conversation, Message } from "../utils/definitions";
+import { Message } from "../utils/definitions";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "react-toastify";
 
 const socket = io(import.meta.env.VITE_API_DOMAIN);
 
 export default function ConversationPane() {
   const { conversationId } = useParams();
-  const [conversation, setConversation] = useState<Conversation>();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState("");
   const { currentUser } = useAuth();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsLoading(true);
-    fetchWithAuth(
-      `${import.meta.env.VITE_API_DOMAIN}/api/conversations/${conversationId}`
-    )
-      .then((res) => res.json())
-      .then((data) => setConversation(data))
-      .finally(() => setIsLoading(false));
+    async function fetchMessages() {
+      try {
+        const res = await fetchWithAuth(
+          `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/conversations/${conversationId}/messages`,
+        );
+        const { messages } = await res.json();
+        setMessages(messages);
+      } catch {
+        toast.error("Failed to load messages");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchMessages();
   }, [conversationId]);
 
   useEffect(() => {
-    // Join the conversation room
-    console.log(conversationId);
+    if (!conversationId) return;
+
     socket.emit("join conversation", conversationId);
 
-    socket.on("chat message", (msg: Message) => {
-      // Update the conversation state with the new message
-      setConversation((prevConversation) => {
-        if (prevConversation) {
-          return {
-            ...prevConversation,
-            messages: [...prevConversation.messages, msg],
-          };
-        }
-        return prevConversation;
-      });
-    });
+    const handleMessage = (msg: Message) => {
+      setMessages((prev) => [...prev, msg]);
+    };
+
+    socket.on("chat message", handleMessage);
 
     return () => {
-      // Leave the conversation room
       socket.emit("leave conversation", conversationId);
-      socket.off("chat message");
+      socket.off("chat message", handleMessage);
     };
   }, [conversationId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const sendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,8 +73,8 @@ export default function ConversationPane() {
       // Save message in Database
       fetchWithAuth(
         `${
-          import.meta.env.VITE_API_DOMAIN
-        }/api/conversations/${conversationId}/messages`,
+          import.meta.env.VITE_API_BASE_URL
+        }/conversations/${conversationId}/messages`,
         {
           method: "POST",
           headers: {
@@ -76,7 +83,7 @@ export default function ConversationPane() {
           body: JSON.stringify({
             content: input,
           }),
-        }
+        },
       );
     }
   };
@@ -90,7 +97,7 @@ export default function ConversationPane() {
       <div className="flex flex-col h-full p-4">
         {/* Message Display Area */}
         <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgb(220_220_220)_transparent] mb-4">
-          {conversation?.messages.map((message, index) => (
+          {messages.map((message, index) => (
             <div key={index} className="mb-2 space-y-1">
               <div className="space-x-2">
                 <span className="font-medium">{message.sender.name}</span>
@@ -101,6 +108,7 @@ export default function ConversationPane() {
               <p className="text-sm">{message.content}</p>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}

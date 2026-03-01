@@ -23,11 +23,11 @@ export default function SidebarLayout() {
     async function fetchConversations() {
       try {
         const res = await fetchWithAuth(
-          `${import.meta.env.VITE_API_DOMAIN}/api/conversations`
+          `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/conversations`,
         );
-        const data = await res.json();
+        const { conversations } = await res.json();
 
-        setConversations(data.conversations);
+        setConversations(conversations);
       } catch (err) {
         if (err instanceof Error) {
           console.error(err.message);

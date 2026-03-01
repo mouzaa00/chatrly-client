@@ -17,7 +17,7 @@ export default function Modal(props: {
   async function createConversationHandle() {
     try {
       const res = await fetchWithAuth(
-        `${import.meta.env.VITE_API_DOMAIN}/api/conversations`,
+        `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/conversations`,
         {
           method: "POST",
           headers: {
@@ -26,10 +26,15 @@ export default function Modal(props: {
           body: JSON.stringify({
             recipientId,
           }),
-        }
+        },
       );
-      const { conversation } = await res.json();
 
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message);
+      }
+
+      const { conversation } = await res.json();
       navigate(`/conversations/${conversation.id}`);
     } catch (err) {
       if (err instanceof Error) {
@@ -46,10 +51,21 @@ export default function Modal(props: {
       ref.current?.showModal();
     }
 
-    fetchWithAuth(`${import.meta.env.VITE_API_DOMAIN}/api/friends`)
-      .then((res) => res.json())
-      .then((data) => setFriends(data.friends))
-      .catch((err) => console.error(err.message));
+    async function fetchFriends() {
+      try {
+        const res = await fetchWithAuth(
+          `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/friends`,
+        );
+        const { friends } = await res.json();
+        setFriends(friends);
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error(err.message);
+        }
+      }
+    }
+
+    fetchFriends();
   }, [props.isOpen]);
 
   return (
