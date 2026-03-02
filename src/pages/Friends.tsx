@@ -82,34 +82,36 @@ export default function Friends() {
   }
 
   return (
-    <main className="p-4">
-      <span className="text-base uppercase">
-        all friends - {friends && friends.length}
-      </span>
-      <div className="mt-2">
-        {friends &&
-          friends.map((friend) => (
-            <div
-              key={friend.id}
-              className="flex justify-between p-2 hover:bg-neutral-200 transition rounded cursor-pointer border-t border-neutral-400"
-            >
-              <span>{friend.name}</span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => getOrCreateConversation(friend.id)}
-                  className="px-2 py-1 cursor-pointer text-sm hover:bg-neutral-700 hover:text-white rounded transition"
-                >
-                  Message
-                </button>
-                <button
-                  onClick={() => handleDeleteFriend(friend.id)}
-                  className="px-2 py-1 cursor-pointer text-sm text-red-700 hover:bg-red-700 hover:text-white rounded transition"
-                >
-                  Remove Friend
-                </button>
+    <main className="p-6 flex justify-center">
+      <div className="w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6">
+        <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+          All Friends ({friends?.length ?? 0})
+        </h1>
+        <div className="space-y-2">
+          {friends &&
+            friends.map((friend) => (
+              <div
+                key={friend.id}
+                className="flex justify-between items-center p-3 hover:bg-gray-100 transition rounded-lg border border-gray-200"
+              >
+                <span className="font-medium text-gray-700">{friend.name}</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => getOrCreateConversation(friend.id)}
+                    className="px-3 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded transition"
+                  >
+                    Message
+                  </button>
+                  <button
+                    onClick={() => handleDeleteFriend(friend.id)}
+                    className="px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-50 rounded transition"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+        </div>
       </div>
     </main>
   );

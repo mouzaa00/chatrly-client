@@ -93,37 +93,39 @@ export default function ConversationPane() {
   }
 
   return (
-    <main className="flex-1">
-      <div className="flex flex-col h-full p-4">
+    <main className="flex-1 p-6 flex justify-center">
+      <div className="w-full flex flex-col h-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6">
         {/* Message Display Area */}
-        <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgb(220_220_220)_transparent] mb-4">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 mb-4">
           {messages.map((message, index) => (
-            <div key={index} className="mb-2 space-y-1">
+            <div key={index} className="mb-4 space-y-1">
               <div className="space-x-2">
-                <span className="font-medium">{message.sender.name}</span>
-                <time className="text-xs text-neutral-700">
+                <span className="font-medium text-gray-700">
+                  {message.sender.name}
+                </span>
+                <time className="text-xs text-gray-500">
                   {format(parseISO(message.createdAt), "dd/MM/yy, hh:mm aa")}
                 </time>
               </div>
-              <p className="text-sm">{message.content}</p>
+              <p className="text-sm text-gray-800">{message.content}</p>
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
-        <form onSubmit={sendMessage}>
+        <form onSubmit={sendMessage} className="mt-auto">
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="Type a message..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
+              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"
             />
             <button
               type="submit"
-              className="bg-black text-white font-medium transition-colors p-3 rounded-lg cursor-pointer hover:bg-black/90"
+              className="bg-indigo-600 text-white font-medium transition-colors p-3 rounded-lg cursor-pointer hover:bg-indigo-700"
             >
               Send
             </button>

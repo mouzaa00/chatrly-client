@@ -5,22 +5,34 @@ export default function FriendsNav() {
 
   return (
     <div className="flex-1">
-      <nav className="flex gap-4 px-4 py-2">
+      <nav className="flex space-x-4 border-b border-gray-200 px-6 py-3">
         <Link
-          to={"friends"}
-          className={`${location.pathname === "/friends" && "bg-neutral-200"} font-medium px-2 py-1 rounded cursor-pointer hover:bg-neutral-200 transition`}
+          to="friends"
+          className={`font-medium px-3 py-2 rounded-lg transition-colors duration-150 ${
+            location.pathname === "/friends"
+              ? "bg-indigo-50 text-indigo-600"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
         >
           All
         </Link>
         <Link
-          to={"friends/pending"}
-          className={`${location.pathname === "/friends/pending" && "bg-neutral-200"} font-medium px-2 py-1 rounded cursor-pointer hover:bg-neutral-200 transition`}
+          to="friends/pending"
+          className={`font-medium px-3 py-2 rounded-lg transition-colors duration-150 ${
+            location.pathname === "/friends/pending"
+              ? "bg-indigo-50 text-indigo-600"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
         >
           Pending
         </Link>
         <Link
-          to={"friends/add"}
-          className={`${location.pathname === "/friends/add" ? "text-green-500" : "bg-green-500 text-white"} font-medium px-2 py-1 rounded cursor-pointer transition`}
+          to="friends/add"
+          className={`font-medium px-3 py-2 rounded-lg transition-colors duration-150 ${
+            location.pathname === "/friends/add"
+              ? "bg-indigo-600 text-white"
+              : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+          }`}
         >
           Add Friend
         </Link>

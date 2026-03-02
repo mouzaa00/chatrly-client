@@ -14,6 +14,8 @@ export default function Modal(props: {
   const [recipientId, setRecipientId] = useState<string>();
   const navigate = useNavigate();
 
+  console.log("Modal rendered with isOpen:", props.isOpen);
+
   async function createConversationHandle() {
     try {
       const res = await fetchWithAuth(
@@ -49,6 +51,8 @@ export default function Modal(props: {
   useEffect(() => {
     if (props.isOpen) {
       ref.current?.showModal();
+    } else {
+      ref.current?.close();
     }
 
     async function fetchFriends() {
@@ -69,59 +73,86 @@ export default function Modal(props: {
   }, [props.isOpen]);
 
   return (
-    <div className="relative">
+    <div>
       <dialog
         ref={ref}
         id="modal"
-        className="w-lg p-4 absolute top-1/2 left-1/2 -translate-1/2 backdrop:bg-slate-950/40 rounded-md outline-1 outline-blue-200"
+        className="fixed inset-1/2 -translate-1/2 w-lg flex items-center justify-center backdrop-blur-sm rounded-2xl shadow-xl [not([open])]:hidden"
+        onCancel={(e) => {
+          e.preventDefault();
+          props.setIsOpen(false);
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            ref.current?.close();
+            props.setIsOpen(false);
+          }
+        }}
       >
-        <div className="flex justify-between">
-          <h3 className="text-lg font-medium">Send a message</h3>
-          <button
-            onClick={() => {
-              ref.current?.close();
-              props.setIsOpen(false);
-            }}
-            className="p-2 bg-blue-100 rounded-full cursor-pointer hover:bg-blue-200 transition-colors"
-          >
-            <X className="size-4 text-blue-700" />
-          </button>
-        </div>
-        {friends && friends?.length !== 0 ? (
-          <form className="mt-3">
-            <p className="mb-1">
-              Choose a user from the list below, to send a message
-            </p>
-            <div className="relative  text-gray-900 flex items-center w-52 rounded-md outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600">
-              <select
-                name="user"
-                id="user"
-                className="appearance-none focus:outline-none w-full px-2 py-1"
-                defaultValue="none"
-                onChange={(e) => setRecipientId(e.target.value)}
-              >
-                <option value="none" disabled>
-                  Select a friend
-                </option>
-                {friends.map((friend) => (
-                  <option key={friend.id} value={friend.id}>
-                    {friend.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronsUpDown className="size-4 absolute  top-1/2 right-2 -translate-y-1/2" />
-            </div>
+        <div className="w-full bg-white/90 p-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-semibold text-gray-800">
+              Send a message
+            </h3>
             <button
-              type="button"
-              className="mt-2 py-1.5 px-3 bg-blue-700 hover:bg-blue-500 transition-colors cursor-pointer rounded-md text-white font-semibold"
-              onClick={createConversationHandle}
+              onClick={() => {
+                ref.current?.close();
+                props.setIsOpen(false);
+              }}
+              className="p-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 transition-colors"
             >
-              Send
+              <X className="w-4 h-4 text-gray-700" />
             </button>
-          </form>
-        ) : (
-          <p className="mt-1 text-red-500">Add some friends!</p>
-        )}
+          </div>
+
+          {friends && friends.length !== 0 ? (
+            <form className="mt-4 space-y-4">
+              <p className="text-gray-600">
+                Choose a user to start a conversation
+              </p>
+
+              <div>
+                <label
+                  htmlFor="user"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Friend
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <select
+                    name="user"
+                    id="user"
+                    className="block w-full appearance-none border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    defaultValue="none"
+                    onChange={(e) => setRecipientId(e.target.value)}
+                  >
+                    <option value="none" disabled>
+                      Select a friend
+                    </option>
+                    {friends.map((friend) => (
+                      <option key={friend.id} value={friend.id}>
+                        {friend.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronsUpDown className="w-5 h-5 absolute top-1/2 right-3 -translate-y-1/2 text-gray-400" />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                onClick={createConversationHandle}
+              >
+                Send
+              </button>
+            </form>
+          ) : (
+            <p className="mt-4 text-red-600">
+              You need to add friends before you can message someone.
+            </p>
+          )}
+        </div>
       </dialog>
     </div>
   );

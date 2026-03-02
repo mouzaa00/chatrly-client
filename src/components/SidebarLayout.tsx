@@ -43,44 +43,72 @@ export default function SidebarLayout() {
   }
 
   return (
-    <div className="flex h-dvh text-neutral-900">
-      <nav className="bg-white flex flex-col h-full border-r border-neutral-400 w-64">
-        <Link
-          to={"friends"}
-          className={`${
-            location.pathname.includes("friends") &&
-            "bg-neutral-200 hover:bg-neutral-200"
-          } flex gap-3 items-center mx-4 my-2 px-2 py-1 cursor-pointer rounded-lg hover:bg-neutral-100`}
-        >
-          <UserIcon className="size-6" />
-          <h2 className="text-xl font-semibold">Friends</h2>
-        </Link>
-        <h2 className="px-4 flex items-center justify-between">
-          <span className="text-sm uppercase">Direct Messages</span>
-          <button
-            className="cursor-pointer"
-            onClick={() => setIsOpenModal(true)}
+    <div className="flex h-dvh text-gray-900">
+      <nav className="bg-white text-gray-900 flex flex-col h-full w-72 shadow border-r border-gray-200">
+        {/* brand / logo area */}
+        <div className="px-6 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight text-indigo-600">
+            Chatrly
+          </h1>
+        </div>
+
+        {/* friends link */}
+        <div className="mt-6">
+          <Link
+            to="friends"
+            className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-colors duration-150 ${
+              location.pathname.includes("friends")
+                ? "bg-indigo-50"
+                : "hover:bg-gray-100"
+            }`}
           >
-            <Plus className="size-4" />
-          </button>
-        </h2>
-        <div className="mt-2 px-3 pt-2 h-full overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgb(220_220_220)_transparent]">
+            <UserIcon className="w-5 h-5 text-indigo-600" />
+            <span className="text-lg font-semibold">Friends</span>
+          </Link>
+        </div>
+
+        {/* direct messages heading */}
+        <div className="mt-8 px-6">
+          <div className="flex items-center justify-between text-xs uppercase tracking-wide text-gray-500">
+            <span>Direct Messages</span>
+            <button
+              onClick={() => setIsOpenModal(true)}
+              className="p-1 rounded-full hover:bg-gray-100 transition"
+            >
+              <Plus className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* conversation list */}
+        <div className="mt-2 px-3 pt-2 flex-1 overflow-y-auto space-y-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           {conversations && currentUser && (
             <Peers conversations={conversations} userId={currentUser.id} />
           )}
         </div>
 
-        <div className="mt-auto border-t border-neutral-400">
-          <div className="flex justify-between w-full">
-            <p className="text-base p-4">{currentUser && currentUser.name}</p>
-            <button className="cursor-pointer p-4" onClick={logout}>
-              <LogOut className="size-4 hover:text-red-700" />
+        {/* profile / logout */}
+        <div className="mt-auto border-t border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
+                {currentUser?.name?.charAt(0).toUpperCase()}
+              </div>
+              <p className="text-sm font-medium truncate">
+                {currentUser?.name}
+              </p>
+            </div>
+            <button
+              onClick={logout}
+              className="p-2 rounded-full hover:bg-gray-100 transition"
+            >
+              <LogOut className="w-5 h-5 text-gray-600" />
             </button>
           </div>
         </div>
       </nav>
       <Outlet />
-      <Modal isOpen={isOpenModal} setIsOpen={setIsOpenModal} />
+      {isOpenModal && <Modal isOpen={isOpenModal} setIsOpen={setIsOpenModal} />}
       <ToastContainer />
     </div>
   );
@@ -94,13 +122,14 @@ function Peers(props: { conversations: Conversation[]; userId: string }) {
     <button
       onClick={() => navigate(`/conversations/${conversation.id}`)}
       key={conversation.id}
-      className={`${
-        conversation.id === conversationId &&
-        "bg-neutral-200 hover:bg-neutral-200"
-      } w-full cursor-pointer hover:bg-neutral-100 transition-colors rounded-lg px-2 my-1 flex items-center gap-2`}
+      className={`w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg transition-colors duration-150 ${
+        conversation.id === conversationId
+          ? "bg-indigo-50"
+          : "hover:bg-gray-100"
+      }`}
     >
-      <MessageCircle className="size-4" />
-      <span className="px-2 py-1">
+      <MessageCircle className="w-5 h-5 text-gray-600" />
+      <span className="truncate">
         {conversation.creator.id === props.userId
           ? conversation.recipient.name
           : conversation.creator.name}

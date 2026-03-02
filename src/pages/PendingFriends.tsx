@@ -73,38 +73,42 @@ export default function PendingFriends() {
   }
 
   return (
-    <main className="p-4">
-      <span className="text-base uppercase">
-        all friends requests - {friendRequests && friendRequests.length}
-      </span>
-      <div className="mt-2">
-        {friendRequests &&
-          friendRequests.map((friendRequest) => (
-            <div
-              key={friendRequest.id}
-              className="flex justify-between p-2 hover:bg-neutral-200 transition rounded cursor-pointer border-t border-neutral-400"
-            >
-              <span>{friendRequest.user.name}</span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    updateFriendRequest(friendRequest.id, "accepted")
-                  }
-                  className="px-2 py-1 cursor-pointer text-sm hover:bg-neutral-700 hover:text-white rounded transition"
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={() =>
-                    updateFriendRequest(friendRequest.id, "rejected")
-                  }
-                  className="px-2 py-1 cursor-pointer text-sm text-red-700 hover:bg-red-700 hover:text-white rounded transition"
-                >
-                  Reject
-                </button>
+    <main className="p-6 flex justify-center">
+      <div className="w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6">
+        <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+          Pending Requests ({friendRequests?.length ?? 0})
+        </h1>
+        <div className="space-y-2">
+          {friendRequests &&
+            friendRequests.map((friendRequest) => (
+              <div
+                key={friendRequest.id}
+                className="flex justify-between items-center p-3 hover:bg-gray-100 transition rounded-lg border border-gray-200"
+              >
+                <span className="font-medium text-gray-700">
+                  {friendRequest.user.name}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      updateFriendRequest(friendRequest.id, "accepted")
+                    }
+                    className="px-3 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded transition"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() =>
+                      updateFriendRequest(friendRequest.id, "rejected")
+                    }
+                    className="px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-50 rounded transition"
+                  >
+                    Reject
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+        </div>
       </div>
     </main>
   );
