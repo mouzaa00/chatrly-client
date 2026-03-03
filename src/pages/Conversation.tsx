@@ -56,6 +56,11 @@ export default function ConversationPane() {
 
     const handleMessage = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
+      // auto-scroll to bottom when a new message is received
+      setTimeout(
+        () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+        0,
+      );
     };
 
     socket.on("chat message", handleMessage);
@@ -102,6 +107,15 @@ export default function ConversationPane() {
 
       socket.emit("chat message", newMessage);
       setInput("");
+
+      // Optimistically add message to UI
+      setMessages((prev) => [...prev, newMessage]);
+
+      // auto-scroll to bottom when a new message is sent
+      setTimeout(
+        () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+        0,
+      );
 
       // Save message in Database
       fetchWithAuth(
