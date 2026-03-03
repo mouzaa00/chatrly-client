@@ -16,16 +16,29 @@ export default function ConversationPane() {
   const [input, setInput] = useState("");
   const { currentUser } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const nextCursorRef = useRef<string | null>(null);
+  const initialLoadRef = useRef(true);
+  const [isFetching, setIsFetching] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
     async function fetchMessages() {
       try {
         const res = await fetchWithAuth(
-          `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/conversations/${conversationId}/messages`,
+          `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/conversations/${conversationId}/messages?limit=10`,
         );
-        const { messages } = await res.json();
+        const { data, hasMore, nextCursor } = await res.json();
+        const messages = data.reverse() as Message[];
         setMessages(messages);
+        nextCursorRef.current = nextCursor;
+        setHasMore(hasMore);
+        // Scroll to bottom only on initial load
+        setTimeout(
+          () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+          0,
+        );
+        initialLoadRef.current = false;
       } catch {
         toast.error("Failed to load messages");
       } finally {
@@ -43,6 +56,12 @@ export default function ConversationPane() {
 
     const handleMessage = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
+      // Scroll to bottom for new incoming messages
+      // Only auto-scroll on the first load
+      setTimeout(
+        () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+        0,
+      );
     };
 
     socket.on("chat message", handleMessage);
@@ -53,9 +72,29 @@ export default function ConversationPane() {
     };
   }, [conversationId]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  async function handleFetchMoreMessages() {
+    console.log(
+      "Fetching more messages with nextCursor:",
+      nextCursorRef.current,
+    );
+    if (!nextCursorRef.current || !hasMore || isFetching) return;
+
+    try {
+      setIsFetching(true);
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_API_DOMAIN}${import.meta.env.VITE_API_PATH}/conversations/${conversationId}/messages?limit=10&cursor=${nextCursorRef.current}`,
+      );
+      const { data, nextCursor, hasMore: more } = await res.json();
+      const messages = data.reverse() as Message[];
+      setMessages((prev) => [...messages, ...prev]);
+      nextCursorRef.current = nextCursor;
+      setHasMore(more);
+    } catch {
+      toast.error("Failed to load more messages");
+    } finally {
+      setIsFetching(false);
+    }
+  }
 
   const sendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,8 +112,8 @@ export default function ConversationPane() {
       // Save message in Database
       fetchWithAuth(
         `${
-          import.meta.env.VITE_API_BASE_URL
-        }/conversations/${conversationId}/messages`,
+          import.meta.env.VITE_API_DOMAIN
+        }${import.meta.env.VITE_API_PATH}/conversations/${conversationId}/messages`,
         {
           method: "POST",
           headers: {
@@ -97,6 +136,19 @@ export default function ConversationPane() {
       <div className="w-full flex flex-col h-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6">
         {/* Message Display Area */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 mb-4">
+          {hasMore && (
+            <div className="flex justify-center my-3">
+              <button
+                disabled={isFetching}
+                className={`text-sm text-gray-500 px-3 py-1 rounded-full border border-gray-200 bg-white/0 shadow-sm hover:bg-gray-50 transition ${
+                  isFetching ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                onClick={handleFetchMoreMessages}
+              >
+                {isFetching ? "Loading..." : "Load more"}
+              </button>
+            </div>
+          )}
           {messages.map((message, index) => (
             <div key={index} className="mb-4 space-y-1">
               <div className="space-x-2">
