@@ -56,12 +56,6 @@ export default function ConversationPane() {
 
     const handleMessage = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
-      // Scroll to bottom for new incoming messages
-      // Only auto-scroll on the first load
-      setTimeout(
-        () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
-        0,
-      );
     };
 
     socket.on("chat message", handleMessage);
