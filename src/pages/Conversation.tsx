@@ -7,8 +7,6 @@ import { Message } from "../utils/definitions";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "react-toastify";
 
-const socket = io(import.meta.env.VITE_API_DOMAIN);
-
 export default function ConversationPane() {
   const { conversationId } = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -20,6 +18,7 @@ export default function ConversationPane() {
   const initialLoadRef = useRef(true);
   const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -52,7 +51,28 @@ export default function ConversationPane() {
   useEffect(() => {
     if (!conversationId) return;
 
-    socket.emit("join conversation", conversationId);
+    socketRef.current = io(import.meta.env.VITE_API_DOMAIN, {
+      withCredentials: true,
+    });
+
+    socketRef.current.on("error", async (err) => {
+      if (err.message === "AUTH_EXPIRED") {
+        // Access token expired — hit your existing refresh endpoint
+        try {
+          await fetch(`${import.meta.env.VITE_API_DOMAIN}/auth/refresh`, {
+            method: "POST",
+            credentials: "include", // sends the refresh token cookie
+          });
+
+          // Cookies are now updated, reconnect
+          socketRef.current?.connect();
+        } catch {
+          toast.error("Session expired, please log in again");
+        }
+      }
+    });
+
+    socketRef.current.emit("join conversation", conversationId);
 
     const handleMessage = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
@@ -63,11 +83,11 @@ export default function ConversationPane() {
       );
     };
 
-    socket.on("chat message", handleMessage);
+    socketRef.current.on("chat message", handleMessage);
 
     return () => {
-      socket.emit("leave conversation", conversationId);
-      socket.off("chat message", handleMessage);
+      socketRef.current?.emit("leave conversation", conversationId);
+      socketRef.current?.off("chat message", handleMessage);
     };
   }, [conversationId]);
 
@@ -105,7 +125,7 @@ export default function ConversationPane() {
         sender: { ...currentUser },
       };
 
-      socket.emit("chat message", newMessage);
+      socketRef.current?.emit("chat message", newMessage);
       setInput("");
 
       // Optimistically add message to UI
